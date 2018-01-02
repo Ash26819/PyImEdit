@@ -194,31 +194,6 @@ class PyImEdit: #TODO inherit from Image
                             self.pix[xii+xi, yii+yi] = target_pix
             TimeReporter.report(remaining_iters)
 
-    def load_image_palette(self, palette_name, palette_pixel_size):
-        palette_dir = "./assets/images/super_compose/palettes/{}/".format(palette_name)
-        palette_image_name_list = list(os.listdir(palette_dir))
-        palette_image_list = list()
-        palette_image_pixel_value_list = list()
-
-        print("Loading palette")
-        num_pics = len(palette_image_name_list)
-        for image_name in palette_image_name_list:
-            fp = "{}{}".format(palette_dir, image_name)
-            pyim = PyImEdit()
-            pyim.set_input_dir(palette_dir)
-            pyim.load_image(image_name)
-            pyim.resize(palette_pixel_size, palette_pixel_size)
-
-            pixel_value = pyim.condense()
-            image = pyim.get_image()
-            palette_image_pixel_value_list.append(pixel_value)
-            palette_image_list.append(image)
-            print("{} of {} -> Image loaded: {}".format(
-                palette_image_name_list.index(image_name)+1, num_pics, pyim.get_image_name()))
-
-        self.palette_image_list = palette_image_list
-        self.palette_image_pixel_value_list = palette_image_pixel_value_list
-
     def make_from(self, color_list):
         for xi in range(self.xsize):
             for yi in range(self.ysize):
@@ -226,30 +201,27 @@ class PyImEdit: #TODO inherit from Image
                 closest_pixel = self.get_closest_pixel(target_pixel, color_list)
                 self.pix[xi, yi] = closest_pixel
 
-    def super_compose(self, palette_pixel_size):
+    def super_compose(self, palette_name, pixel_size, scale=10):
         print("Super composing image: {}".format(self.image_name))
-        scale = 10
-        step = palette_pixel_size//scale
+        step = pixel_size//scale
         xsize = self.xsize//step*step
         ysize = self.ysize//step*step
         self.resize(xsize, ysize)
         canvas_xsize, canvas_ysize = self.xsize*scale, self.ysize*scale
         self.create_canvas(canvas_xsize, canvas_ysize)
 
-        #TODO Iterate over canvas isntead of self.im?
-
+        palette = Palette()
+        image_palette = palette.load_image_palette(palette_name, pixel_size)
         for yi in range(0, self.ysize, step):
             remaining_iters = (self.ysize-yi)//step
             time_reporter = TimeReporter()
             for xi in range(0, self.xsize, step):
                 pixel_region = self.get_pixel_region((xi, yi), step, step)
                 target_pixel = self.average_pixels(pixel_region)
-                #target_pixel = self.pix[xi, yi]
-                best_pixel = self.get_closest_pixel(target_pixel, self.palette_image_pixel_value_list)
-                pixel_image = self.palette_image_list[self.palette_image_pixel_value_list.index(best_pixel)]
+                pixel_image = palette.get_closest_image_to_pixel(target_pixel)
                 pixel_image_pix = pixel_image.load()
-                for yci in range(palette_pixel_size):
-                    for xci in range(palette_pixel_size):
+                for yci in range(pixel_size):
+                    for xci in range(pixel_size):
                         xc = xi*scale + xci
                         yc = yi*scale + yci
                         self.canvas_pix[xc,yc] = pixel_image_pix[xci, yci]
@@ -259,20 +231,22 @@ class PyImEdit: #TODO inherit from Image
     def ripple(self, pyim2, x=None, y=None, wavelength=90):
         other_im = pyim2.get_image()
         other_pix = other_im.load()
-        if x is None or y is None:
-            x,y = self.xsize//2, self.ysize//2
+        if x is None:
+            x = self.xsize//2
+        if y is None:
+            y = self.ysize//2
 
-        start = time.time()
         for yi in range(self.ysize):
+            time_reporter = TimeReporter()
+            remaining_iters = self.ysize-yi
             for xi in range(self.xsize):
                 dist = ( (xi-x)**2 + (yi-y)**2 )**0.5
                 alpha = 0.5 * math.sin((2*math.pi)/wavelength*dist) + 0.5
-                this_alpha_pixel  = [int(c*alpha) for c in  self.pix[xi, yi]]
-                other_alpha_pixel = [int(c*(1-alpha)) for c in other_pix[xi, yi]]
+                this_alpha_pixel  = [int(component*alpha) for component in self.pix[xi, yi]]
+                other_alpha_pixel = [int(component*(1-alpha)) for component in other_pix[xi, yi]]
                 alpha_pixel = tuple(a1c+a2c for a1c, a2c in zip(this_alpha_pixel, other_alpha_pixel))
                 self.pix[xi, yi] = alpha_pixel
-        end = time.time()
-        print(end-start)
+            time_reporter.report(remaining_iters)
 
     def rotate(self, degrees=None):
         rads = (math.pi/180)*degrees
