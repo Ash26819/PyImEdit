@@ -7,21 +7,35 @@ from assets.objects.Palette import Palette
 from assets.objects.Profile import Profile
 from assets.objects.TimeReporter import TimeReporter
 
-class PyImEdit():
-    def __init__(self):
-        self.input_dir = None
-        self.output_dir = None
-        self.database_dir = None
+class PyImEdit: #TODO inherit from Image
+    def __init__(self,
+            input_dir=None,
+            output_dir=None,
+            image_fp=None):
+        self.image_input_dir = input_dir
+        self.image_output_dir = output_dir
+        self.load_image(image_fp)
+
+    def load_image(self, image_name):
+        self.image_name = image_name[:-4] #don't include file extension in image_name
+        self.image_fp = "{}{}".format(self.input_dir, image_name)
+        image = Image.open(self.image_fp)
+        self.init_vars(image)
+
+    def init_vars(self, image):
+        self.image = image
+        self.xsize, self.ysize = image.size
+        self.pix = image.load()
 
     def show_active_directories(self):
-        print("Current input directory: {}".format(self.input_dir))
-        print("Current output directory: {}".format(self.output_dir), end="\n\n")
+        print("Current input directory: {}".format(self.image_input_dir))
+        print("Current output directory: {}".format(self.image_output_dir), end="\n\n")
 
     def set_input_dir(self, input_dir):
-        self.input_dir = input_dir
+        self.image_input_dir = input_dir
 
     def set_output_dir(self, output_dir):
-        self.output_dir = output_dir
+        self.image_output_dir = output_dir
 
     def get_pix(self):
         return self.pix
@@ -52,17 +66,6 @@ class PyImEdit():
                 palette[block_name] = pixel_value
 
         self.palette = palette
-
-    def init_vars(self, image):
-        self.image = image
-        self.xsize, self.ysize = image.size
-        self.pix = image.load()
-
-    def load_image(self, image_name):
-        self.image_name = image_name[:-4]
-        fp = "{}{}".format(self.input_dir, image_name)
-        image = Image.open(fp)
-        self.init_vars(image)
 
     def show(self):
         self.image.show()
