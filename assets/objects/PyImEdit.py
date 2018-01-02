@@ -56,7 +56,6 @@ class PyImEdit: #TODO inherit from Image
     #############################################################
     #DAO Functions###############################################
     #############################################################
-
     def show(self):
         self.image.show()
 
@@ -78,24 +77,6 @@ class PyImEdit: #TODO inherit from Image
     #######################################################################
     #End DAO Functions#####################################################
     #######################################################################
-
-    #Helper functions#
-    @staticmethod
-    def pixel_distance(pixel1, pixel2):
-        """Use when I need the actual distance between pixels"""
-        r1, g1, b1 = pixel1[:3]
-        r2, g2, b2 = pixel2[:3]
-        distance = ((r2-r1)**2 + (g2-g1)**2 + (b2-b1)**2)**0.5
-        return distance
-
-    @staticmethod
-    def pixel_difference(pixel1, pixel2):
-        """Use when I'm searching for the closest value in a list"""
-        r1, g1, b1 = pixel1[:3]
-        r2, g2, b2 = pixel2[:3]
-        difference = (r2-r1)**2 + (g2-g1)**2 + (b2-b1)**2
-        return difference
-
     def get_closest_pixel(self, target_pixel, pixel_list):
         best_difference = self.pixel_difference((0,0,0), (255,255,255))
         best_pixel = None
