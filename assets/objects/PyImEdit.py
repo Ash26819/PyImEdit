@@ -8,9 +8,6 @@ from assets.objects.Palette import Palette
 from assets.objects.Profile import Profile
 from assets.objects.TimeReporter import TimeReporter
 
-class Palette:
-
-
 class PyImEdit: #TODO inherit from Image
     def __init__(self,
             input_dir=None, output_dir=None, image_name=None,

@@ -1,9 +1,9 @@
 import os
-from PIL import Image
 import csv
+from PIL import Image
 
 import assets.modules.PixelFunctions as PF
-from assets.objects.PyImEdit import PyImEdit
+import assets.modules.ImageFunctions as IF
 
 class Palette():
     def __init__(self):
@@ -34,11 +34,11 @@ class Palette():
         print("Loading palette")
         num_pics = len(palette_image_name_list)
         for image_name in palette_image_name_list:
-            pyim = PyImEdit(input_dir=palette_dir, image_name=image_name)
+            image_fp = "{}{}".format(palette_dir, image_name)
+            image = Image.open(image_fp)
 
-            pixel_value = pyim.condense()
-            pyim.resize(pixel_size, pixel_size)
-            image = pyim.get_image()
+            pixel_value = IF.condense(image)
+            resized_image = image.resize((pixel_size, pixel_size))
 
             image_palette[pixel_value] = image
 
