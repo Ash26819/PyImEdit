@@ -1,4 +1,4 @@
-block_name,r,g,b,block_id,block_data
+palette_color,r,g,b,block_id,block_data
 bedrock,82,82,82,7,0
 black_shulker_box,25,25,29,234,1
 black_terracotta,67,29,32,250,3
