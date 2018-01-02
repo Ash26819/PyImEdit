@@ -284,12 +284,6 @@ class PyImEdit: #TODO inherit from Image
         end = time.time()
         print(end-start)
 
-    def flip(self):
-        self.create_canvas(self.xsize, self.ysize)
-        for yi in range(self.ysize):
-            for xi in range(self.xsize):
-                self.pix[xi,yi] = self.pix[xi, self.ysize-yi-1]
-
     def rotate(self, degrees=None):
         rads = (math.pi/180)*degrees
         xsize = int(self.xsize)
