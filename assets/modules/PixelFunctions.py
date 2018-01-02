@@ -31,3 +31,13 @@ def average_pixels(pixel_list):
     g = gt//num_pixels
     b = bt//num_pixels
     return r,g,b
+
+def pixel_list_distance(pixel_list1, pixel_list2):
+    distance_sum = 0
+    num_pixels = len(pixel_list1)
+    for i in range(num_pixels):
+        pixel1 = pixel_list1[i]
+        pixel2 = pixel_list2[i]
+        pixel_distance = distance(pixel1, pixel2)
+        distance_sum += pixel_distance
+    return distance_sum

@@ -219,16 +219,6 @@ class PyImEdit: #TODO inherit from Image
         self.palette_image_list = palette_image_list
         self.palette_image_pixel_value_list = palette_image_pixel_value_list
 
-    def pixel_list_distance(self, pixels1, pixels2):
-        assert len(pixels1) == len(pixels2)
-        distance_sum = 0
-        num_pixels = len(pixels1)
-        for i in range(num_pixels):
-            pix1 = pixels1[i]
-            pix2 = pixels2[i]
-            distance_sum += self.pixel_distance(pix1, pix2)
-        return distance_sum
-
     def make_from(self, color_list):
         for xi in range(self.xsize):
             for yi in range(self.ysize):
