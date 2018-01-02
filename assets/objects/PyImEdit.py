@@ -8,14 +8,12 @@ from assets.objects.Palette import Palette
 from assets.objects.Profile import Profile
 from assets.objects.TimeReporter import TimeReporter
 
-class PyImEdit: #TODO inherit from Image
-    def __init__(self,
-            input_dir=None, output_dir=None, image_name=None,
-            palette_dir=None):
-
+class PyImEdit:
+    def __init__(self, input_dir=None, output_dir=None, image_name=None):
         self.set_image_input_dir(input_dir)
         self.set_image_output_dir(output_dir)
-        self.load_image(image_name)
+        if image_name:
+            self.load_image(image_name)
 
     def load_image(self, image_name):
         self.image_name = image_name[:-4] #don't include file extension in image_name
@@ -68,7 +66,7 @@ class PyImEdit: #TODO inherit from Image
         self.canvas.show()
 
     def save(self, save_name):
-        save_fp = "{}{}.png".format(self.output_dir, save_name)
+        save_fp = "{}{}.png".format(self.image_output_dir, save_name)
         self.image.save(save_fp)
         print("Image saved at {}".format(save_fp))
 
@@ -94,7 +92,7 @@ class PyImEdit: #TODO inherit from Image
         thumbnail_fp = "./assets/images/thumbnailer/thumbnails/{}.png".format(thumbnail_name)
         tn_xsize = int(self.xsize * 0.20)
         tn_ysize = int(self.ysize * 0.20)
-        thumbnail_im = Image.open(tnfp).resize((tn_xsize, tn_ysize))
+        thumbnail_im = Image.open(thumbnail_fp).resize((tn_xsize, tn_ysize))
         tn_pix = thumbnail_im.load()
 
         x, y = point
@@ -123,25 +121,21 @@ class PyImEdit: #TODO inherit from Image
                 closest_pixel = profile.look_up(target_pixel)
                 self.pix[xi, yi] = closest_pixel
 
-    def round_to(self, from_color, to_color):
-        test_distance = self.pixel_distance((255,255,0), from_color)
+    def round_to(self, from_color, to_color, sensitivity):
         for yi in range(self.ysize):
             for xi in range(self.xsize):
                 target_pix = self.pix[xi,yi]
-                if PF.distance(target_pix, from_color) < test_distance:
+                if PF.distance(target_pix, from_color) < sensitivity:
                     self.pix[xi, yi] = to_color
 
     def colorscale(self, method=None):
         for yi in range(self.ysize):
             for xi in range(self.xsize):
                 pixel = self.pix[xi, yi][0:3]
-                if (PF.difference(pixel, (128,128,128)) < PF.difference(pixel, (0,0,128))):
-                    new_pixel = (None)
                 gray_component = pixel[0]
                 blue_component = pixel[2]
 
-                pixel_canvas = [gray_component,gray_component,blue_component]
-                new_pixel = tuple(pixel_canvas)
+                new_pixel = (gray_component,gray_component,blue_component)
                 self.pix[xi, yi] = new_pixel
 
     def grayscale(self, method=None):
@@ -176,12 +170,55 @@ class PyImEdit: #TODO inherit from Image
                             self.pix[xii+xi, yii+yi] = target_pix
             TimeReporter.report(remaining_iters)
 
+    def watermark(self, im2, xstart):
+        im2 = im2.resize((2560//2, 1440))
+        im2_xsize, im2_ysize = im2.size
+        im2_pix = im2.load()
+
+        for yi in range(im2_ysize):
+            for xi in range(im2_xsize):
+                alpha = math.cos(math.pi/2/2560*xi)**2
+                pixel = PF.alpha_combine(self.pix[xstart+xi, yi], im2_pix[xi, yi], alpha)
+                self.pix[xstart+xi, yi] = pixel
+
+    def banner_create(self, im2, im3, im4):
+        banner_xsize = 2560//2
+        banner_ysize = 1440
+        size = banner_xsize, banner_ysize
+        im1 = self.get_image()
+        im1 = im1.resize(size, Image.ANTIALIAS)
+        im2 = im2.resize(size, Image.ANTIALIAS)
+        #im3 = im3.resize(size, Image.ANTIALIAS)
+        #im4 = im4.resize(size, Image.ANTIALIAS)
+
+        self.create_canvas(2560, 1440)
+        for i in range(1):
+            print(i)
+            if i == 0:
+                pix1 = im1.load()
+                pix2 = im2.load()
+            elif i == 1:
+                pix1 = im2.load()
+                pix2 = im3.load()
+            elif i == 2:
+                pix1 = im3.load()
+                pix2 = im4.load()
+
+            start = i*banner_xsize
+            for yi in range(self.canvas_ysize):
+                for xi in range(banner_xsize):
+                    alpha = math.cos(math.pi/2/banner_xsize*xi)**2
+                    pixel = PF.alpha_combine(pix1[xi, yi], pix2[xi, yi], alpha)
+                    self.canvas_pix[start+xi, yi] = pixel
+        self.use_canvas()
+
     def make_from(self, color_list):
         for xi in range(self.xsize):
             for yi in range(self.ysize):
                 target_pixel = self.pix[xi, yi]
                 closest_pixel = self.get_closest_pixel(target_pixel, color_list)
                 self.pix[xi, yi] = closest_pixel
+        self.use_canvas()
 
     def super_compose(self, palette_name, pixel_size, scale=10):
         print("Super composing image: {}".format(self.image_name))
@@ -240,6 +277,7 @@ class PyImEdit: #TODO inherit from Image
         print(ysize, degrees)
         self.create_canvas(xsize, ysize)
         self.resize(xsize, ysize)
+
 
     def chainmaille_pattern(self):
         bg_color = (255,255,255)
