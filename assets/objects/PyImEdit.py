@@ -10,16 +10,16 @@ from assets.objects.TimeReporter import TimeReporter
 
 class PyImEdit: #TODO inherit from Image
     def __init__(self,
-            input_dir=None, output_dir=None, image_fp=None,
+            input_dir=None, output_dir=None, image_name=None,
             palette_dir=None):
 
         self.set_image_input_dir(input_dir)
         self.set_image_output_dir(output_dir)
-        self.load_image(image_fp)
+        self.load_image(image_name)
 
     def load_image(self, image_name):
         self.image_name = image_name[:-4] #don't include file extension in image_name
-        self.image_fp = "{}{}".format(self.input_dir, image_name)
+        self.image_fp = "{}{}".format(self.image_input_dir, image_name)
         image = Image.open(self.image_fp)
         self.init_vars(image)
 
@@ -119,16 +119,16 @@ class PyImEdit: #TODO inherit from Image
 
     def compose_from_palette(self, palette_name):
         #TODO add a check to see if has a profile
-        Palette = Palette(palette_name)
+        palette = Palette(palette_name)
         for yi in range(self.ysize):
             remaining_iters = self.ysize-yi
-            TimeReporter = TimeReporter()
+            time_reporter = TimeReporter()
             for xi in range(self.xsize):
                 target_pixel = self.pix[xi, yi]
-                color_name = Palette.get_closest_color(target_pixel)
-                color_value = Palette.get_color_value(color_name)
+                color_name = palette.get_closest_color(target_pixel)
+                color_value = palette.get_color_value(color_name)
                 self.pix[xi, yi] = color_value
-            TimeReporter.report(remaining_iters)
+            time_reporter.report(remaining_iters)
 
     def compose_image_from_profile(self, profile_name):
         profile = Profile()
