@@ -53,9 +53,6 @@ class PyImEdit: #TODO inherit from Image
     def get_image_name(self):
         return self.image_name
 
-    #############################################################
-    #DAO Functions###############################################
-    #############################################################
     def show(self):
         self.image.show()
 
@@ -74,21 +71,6 @@ class PyImEdit: #TODO inherit from Image
         save_fp = "{}{}.png".format(self.output_dir, save_name)
         self.image.save(save_fp)
         print("Image saved at {}".format(save_fp))
-    #######################################################################
-    #End DAO Functions#####################################################
-    #######################################################################
-    def get_closest_palette_color(self, target_pixel, palette):
-        best_difference = self.pixel_difference((0,0,0), (255,255,255))
-        best_color = None
-
-        for color_name in palette.keys():
-            test_pixel = palette[color_name]
-            test_difference = self.pixel_difference(target_pixel, test_pixel)
-            if test_difference < best_difference:
-                best_difference = test_difference
-                best_color = color_name
-
-        return best_color
 
     def condense(self):
         """calculate average value of pixels in this image"""
