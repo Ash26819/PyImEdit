@@ -1,8 +1,9 @@
 from PIL import Image
 
 class Profile():
-    def __init__(self):
+    def __init__(self, profile_name):
         self.profile_dir = "./assets/database/profiles/"
+        self.load_profile(profile_name)
 
     def set_profile_dir(self, profile_dir):
         self.profile_dir = profile_dir

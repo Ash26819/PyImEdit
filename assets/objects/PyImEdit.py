@@ -72,21 +72,6 @@ class PyImEdit: #TODO inherit from Image
         self.image.save(save_fp)
         print("Image saved at {}".format(save_fp))
 
-    def condense(self):
-        """calculate average value of pixels in this image"""
-        rt, gt, bt = 0,0,0
-        for yi in range(self.ysize):
-            for xi in range(self.xsize):
-                ri, gi, bi, = self.pix[xi, yi][:3]
-                rt += ri
-                gt += gi
-                bt += bi
-        num_pixels = self.xsize*self.ysize
-        r = rt//num_pixels
-        g = gt//num_pixels
-        b = bt//num_pixels
-        return r,g,b
-
     def get_pixel_region(self, point, xsize, ysize):
         pixel_list = list()
         x, y = point
@@ -118,7 +103,6 @@ class PyImEdit: #TODO inherit from Image
                 self.pix[xi+x, yi+y] = tn_pix[xi, yi]
 
     def compose_from_palette(self, palette_name):
-        #TODO add a check to see if has a profile
         palette = Palette(palette_name)
         for yi in range(self.ysize):
             remaining_iters = self.ysize-yi
@@ -131,8 +115,7 @@ class PyImEdit: #TODO inherit from Image
             time_reporter.report(remaining_iters)
 
     def compose_image_from_profile(self, profile_name):
-        profile = Profile()
-        profile.load_profile(profile_name)
+        profile = Profile(profile_name)
         for yi in range(self.ysize):
             TimeReporter = TimeReporter()
             for xi in range(self.xsize):
