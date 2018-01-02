@@ -219,13 +219,6 @@ class PyImEdit: #TODO inherit from Image
         self.palette_image_list = palette_image_list
         self.palette_image_pixel_value_list = palette_image_pixel_value_list
 
-    @staticmethod
-    def flatten(image):
-        pix = image.load()
-        xsize, ysize = image.size
-        flat_pix = [pix[xi, yi] for yi in range(ysize) for xi in range(xsize)]
-        return flat_pix
-
     def get_closest_image_to_region(self, target_region, image_list):
         image_region_list = [self.flatten(image) for image in image_list]
         distance_list = [self.pixel_list_distance(target_region, test_region)
