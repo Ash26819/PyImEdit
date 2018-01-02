@@ -87,20 +87,6 @@ class PyImEdit: #TODO inherit from Image
         b = bt//num_pixels
         return r,g,b
 
-    @staticmethod
-    def average_pixels(pixel_list):
-        rt,gt,bt = 0,0,0
-        for pixel in pixel_list:
-            ri, gi, bi = pixel[:3]
-            rt += ri
-            gt += gi
-            bt += bi
-        num_pixels = len(pixel_list)
-        r = rt//num_pixels
-        g = gt//num_pixels
-        b = bt//num_pixels
-        return r,g,b
-
     def get_pixel_region(self, point, xsize, ysize):
         pixel_list = list()
         x, y = point

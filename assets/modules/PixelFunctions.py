@@ -18,3 +18,16 @@ def get_closest_pixel(target_pixel, pixel_list):
             best_pixel = test_pixel
 
     return best_pixel
+
+def average_pixels(pixel_list):
+    rt, gt, bt = 0,0,0
+    for pixel in pixel_list:
+        ri, gi, bi = pixel[0:3]
+        rt += ri
+        gt += gi
+        bt += bi
+    num_pixels = len(pixel_list)
+    r = rt//num_pixels
+    g = gt//num_pixels
+    b = bt//num_pixels
+    return r,g,b
