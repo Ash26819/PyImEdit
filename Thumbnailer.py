@@ -7,8 +7,8 @@ output_dir = "./assets/images/thumbnailer/output/"
 flashdrive_colors = ["red", "green", "blue", "yellow", "megenta", "cyan","white", "black", "gray"]
 thumbnails = ["top_rated_seller", "free_shipping"]
 flashdrive = PyImEdit()
-flashdrive.set_input_dir(input_dir)
-flashdrive.set_output_dir(output_dir)
+flashdrive.set_image_input_dir(input_dir)
+flashdrive.set_image_output_dir(output_dir)
 
 thumbnail_name = thumbnails[0]
 for color in flashdrive_colors:
