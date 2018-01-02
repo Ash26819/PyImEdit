@@ -41,3 +41,12 @@ def pixel_list_distance(pixel_list1, pixel_list2):
         pixel_distance = distance(pixel1, pixel2)
         distance_sum += pixel_distance
     return distance_sum
+
+def alpha_combine(pixel1, pixel2, alpha):
+    r1, g1, b1 = pixel1[0:3]
+    r2, g2, b2 = pixel2[0:3]
+    r = r1*alpha + r2*(alpha-1)
+    g = g1*alpha + g2*(alpha-1)
+    b = b1*alpha + b2*(alpha-1)
+    return r,g,b
+
