@@ -219,13 +219,6 @@ class PyImEdit: #TODO inherit from Image
         self.palette_image_list = palette_image_list
         self.palette_image_pixel_value_list = palette_image_pixel_value_list
 
-    def get_closest_image_to_region(self, target_region, image_list):
-        image_region_list = [self.flatten(image) for image in image_list]
-        distance_list = [self.pixel_list_distance(target_region, test_region)
-                for test_region in image_region_list]
-        min_distance_index = distance_list.index(min(distance_list))
-        return image_list[min_distance_index]
-
     def pixel_list_distance(self, pixels1, pixels2):
         assert len(pixels1) == len(pixels2)
         distance_sum = 0
@@ -307,7 +300,6 @@ class PyImEdit: #TODO inherit from Image
         print(ysize, degrees)
         self.create_canvas(xsize, ysize)
         self.resize(xsize, ysize)
-
 
     def chainmaille_pattern(self):
         bg_color = (255,255,255)
