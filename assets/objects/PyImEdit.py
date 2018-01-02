@@ -77,19 +77,6 @@ class PyImEdit: #TODO inherit from Image
     #######################################################################
     #End DAO Functions#####################################################
     #######################################################################
-    def get_closest_pixel(self, target_pixel, pixel_list):
-        best_difference = self.pixel_difference((0,0,0), (255,255,255))
-        best_pixel = None
-
-        for test_pixel in pixel_list:
-            test_difference = self.pixel_difference(target_pixel, test_pixel)
-
-            if test_difference < best_difference:
-                best_difference = test_difference
-                best_pixel = test_pixel
-
-        return best_pixel
-
     def get_closest_palette_color(self, target_pixel, palette):
         best_difference = self.pixel_difference((0,0,0), (255,255,255))
         best_color = None
