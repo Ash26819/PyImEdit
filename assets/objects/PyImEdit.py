@@ -2,6 +2,7 @@ import sys, os
 import math, random, csv
 from PIL import Image
 
+import assets.modules.PixelFunctions as PF
 from assets.objects.Pixel import Pixel
 from assets.objects.Palette import Palette
 from assets.objects.Profile import Profile
@@ -9,11 +10,11 @@ from assets.objects.TimeReporter import TimeReporter
 
 class PyImEdit: #TODO inherit from Image
     def __init__(self,
-            input_dir=None,
-            output_dir=None,
-            image_fp=None):
-        self.image_input_dir = input_dir
-        self.image_output_dir = output_dir
+            input_dir=None, output_dir=None, image_fp=None
+            palette_dir=None):
+
+        self.set_image_input_dir(input_dir)
+        self.set_image_output_dir(output_dir)
         self.load_image(image_fp)
 
     def load_image(self, image_name):
@@ -31,11 +32,14 @@ class PyImEdit: #TODO inherit from Image
         print("Current input directory: {}".format(self.image_input_dir))
         print("Current output directory: {}".format(self.image_output_dir), end="\n\n")
 
-    def set_input_dir(self, input_dir):
+    def set_image_input_dir(self, input_dir):
         self.image_input_dir = input_dir
 
-    def set_output_dir(self, output_dir):
+    def set_image_output_dir(self, output_dir):
         self.image_output_dir = output_dir
+
+    def set_palette_dir(self, palette_dir):
+        self.palette_dir = palette_dir
 
     def get_pix(self):
         return self.pix
@@ -52,20 +56,6 @@ class PyImEdit: #TODO inherit from Image
     #############################################################
     #DAO Functions###############################################
     #############################################################
-
-    def load_palette(self, palette_name):
-        palette_dir = "./assets/database/palettes/"
-        palette_fp = "{}{}.csv".format(palette_dir, palette_name)
-        palette = dict()
-        with open(palette_fp, "r") as palette_file:
-            reader = csv.DictReader(palette_file)
-            for row in reader:
-                block_name = row["block_name"]
-                r,g,b = int(row["r"]), int(row["g"]), int(row["b"])
-                pixel_value = r,g,b
-                palette[block_name] = pixel_value
-
-        self.palette = palette
 
     def show(self):
         self.image.show()
@@ -193,38 +183,27 @@ class PyImEdit: #TODO inherit from Image
             for xi in range(tn_ysize):
                 self.pix[xi+x, yi+y] = tn_pix[xi, yi]
 
-    def compose_image_from_palette(self, palette_name):
-        pass
+    def compose_image_from_palette(self, palette_name): #TODO add a check to see if has a profile
+        Palette = Palette(palette_name)
+        for yi in range(self.ysize):
+            remaining_iters = self.ysize-yi
+            TimeReporter = TimeReporter()
+            for xi in range(self.xsize):
+                target_pixel = self.pix[xi, yi]
+                color_name = Palette.get_closest_color(target_pixel)
+                color_value = Palette.get_color_value(color_name)
+                self.pix[xi, yi] = color_value
+            TimeReporter.report(remaining_iters)
 
     def compose_image_from_profile(self, profile_name):
         profile = Profile()
         profile.load_profile(profile_name)
         for yi in range(self.ysize):
+            TimeReporter = TimeReporter()
             for xi in range(self.xsize):
                 target_pixel = self.pix[xi, yi]
                 closest_pixel = profile.look_up(target_pixel)
                 self.pix[xi, yi] = closest_pixel
-
-    def compose_image(self, profile=None, palette=None):
-        if profile:
-            self.compose_image_from_profile(profile)
-        elif palette:
-            self.compose_image_from_palette(palette)
-
-    def compose_image_from_palette(self, palette_name):
-        self.load_palette(palette_name)
-        for yi in range(self.ysize):
-            remaining_iters = self.ysize - yi
-            start = time.time()
-            for xi in range(self.xsize):
-                target_pixel = self.pix[xi, yi]
-                closest_color_name = self.get_closest_palette_color(target_pixel, self.palette)
-                closest_pixel = self.palette[closest_color_name]
-                self.pix[xi, yi] = closest_pixel
-            end = time.time()
-            iter_time = end-start
-            print("Remaining iterations: {}, Iteration Time: {:.2f}, ETC: {:.2f}".format(
-                remaining_iters, iter_time, remaining_iters*iter_time))
 
     def round_to(self, from_color, to_color):
         test_distance = self.pixel_distance((255,255,0), from_color)
@@ -252,31 +231,33 @@ class PyImEdit: #TODO inherit from Image
         if method is None:
             return
         for yi in range(self.ysize):
-            print(self.ysize-yi)
+            remaining_iters = self.ysize-yi
+            TimeReporter = TimeReporter()
             for xi in range(self.xsize):
                 pixel = Pixel(self.pix[xi,yi])
                 pixel.convert_to_gray(method=method)
                 gray_pixel = pixel.get_rgb()
                 self.pix[xi, yi] = gray_pixel
+            TimeReporter.report(remaining_iters)
 
     def sharpen(self, sensitivity=50, itersize=10):
-        #must first crop image so that edges are accounted for
-        xstart = 0
-        ystart = 0
-        xend = self.xsize//itersize * itersize
-        yend = self.ysize//itersize * itersize
-        self.crop(xstart, ystart, xend, yend) #TODO should resize here isntead
+        xsize = self.xsize//itersize * itersize
+        ysize = self.ysize//itersize * itersize
+        self.resize(xsize, ysize)
         for yii in range(0, self.ysize, itersize):
-            print(self.ysize-yii)
+            remaining_iters = self.ysize-yii
+            TimeReporter = TimeReporter()
             for xii in range(0, self.xsize, itersize):
                 for yi in range(itersize):
                     for xi in range(itersize):
+                        #choose random pixel in itersize range to sharpen to
                         rx = random.randrange(itersize)
                         ry = random.randrange(itersize)
                         target_pix = self.pix[xii+rx, yii+ry]
                         current_pix = self.pix[xii+xi, yii+yi]
-                        if self.pixel_distance(target_pix, current_pix) <= sensitivity:
+                        if PF.distance(target_pix, current_pix) <= sensitivity:
                             self.pix[xii+xi, yii+yi] = target_pix
+            TimeReporter.report(remaining_iters)
 
     def load_image_palette(self, palette_name, palette_pixel_size):
         palette_dir = "./assets/images/super_compose/palettes/{}/".format(palette_name)
@@ -326,24 +307,6 @@ class PyImEdit: #TODO inherit from Image
             pix2 = pixels2[i]
             distance_sum += self.pixel_distance(pix1, pix2)
         return distance_sum
-
-    def other_super_compose(self, palette_name, palette_pixel_size=40):
-        palette_image_list, palette_image_pixel_value_list = self.load_image_palette(palette_name, palette_pixel_size)
-        self.create_canvas(self.xsize, self.ysize)
-
-        step = palette_pixel_size
-        for yi in range(0, self.ysize, step):
-            remaining_iters = (self.ysize-yi)//step
-            time_reporter = TimeReporter()
-            for xi in range(0, self.xsize, step):
-                target_region = self.get_pixel_region((xi, yi), step, step)
-                closest_im = self.get_closest_image_to_region(target_region, palette_image_list)
-                closest_im_pix = closest_im.load()
-                for cyi in range(palette_pixel_size):
-                    for cxi in range(palette_pixel_size):
-                        self.canvas_pix[xi+cxi, yi+cyi] = closest_im_pix[cxi, cyi]
-            time_reporter.report(remaining_iters)
-        self.use_canvas()
 
     def make_from(self, color_list):
         for xi in range(self.xsize):
