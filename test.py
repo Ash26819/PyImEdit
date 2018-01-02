@@ -6,5 +6,5 @@ output_dir = "./assets/images/test/"
 image_name = "bell2.png"
 pyim = PyImEdit(input_dir, output_dir, image_name)
 
-pyim.compose_from_palette("base_wire_colors")
+pyim.super_compose("space_pics", pixel_size=10)
 pyim.show()

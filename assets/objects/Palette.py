@@ -3,6 +3,7 @@ from PIL import Image
 import csv
 
 import assets.modules.PixelFunctions as PF
+from assets.objects.PyImEdit import PyImEdit
 
 class Palette():
     def __init__(self):
@@ -25,7 +26,7 @@ class Palette():
 
         self.palette = palette
 
-    def load_image_palette(palette_name, pixel_size):
+    def load_image_palette(self, palette_name, pixel_size):
         palette_dir = "./assets/images/super_compose/palettes/{}/".format(palette_name)
         palette_image_name_list = list(os.listdir(palette_dir))
         image_palette = dict()
@@ -33,7 +34,7 @@ class Palette():
         print("Loading palette")
         num_pics = len(palette_image_name_list)
         for image_name in palette_image_name_list:
-            pyim = PyImEdit(input_dir=palette_dir, image_name)
+            pyim = PyImEdit(input_dir=palette_dir, image_name=image_name)
 
             pixel_value = pyim.condense()
             pyim.resize(pixel_size, pixel_size)
