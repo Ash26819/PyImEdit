@@ -128,16 +128,15 @@ class PyImEdit: #TODO inherit from Image
         for yi in range(self.ysize):
             for xi in range(self.xsize):
                 target_pix = self.pix[xi,yi]
-                if self.pixel_distance(target_pix, from_color) < test_distance:
+                if PF.distance(target_pix, from_color) < test_distance:
                     self.pix[xi, yi] = to_color
 
     def colorscale(self, method=None):
         for yi in range(self.ysize):
             for xi in range(self.xsize):
                 pixel = self.pix[xi, yi][0:3]
-                if (self.pixel_difference(pixel, (128,128,128)) <
-                    self.pixel_difference(pixel, (0,0,128))):
-                    new_pixel = ()
+                if (PF.difference(pixel, (128,128,128)) < PF.difference(pixel, (0,0,128))):
+                    new_pixel = (None)
                 gray_component = pixel[0]
                 blue_component = pixel[2]
 
