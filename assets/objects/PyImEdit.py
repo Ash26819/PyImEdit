@@ -10,7 +10,7 @@ from assets.objects.TimeReporter import TimeReporter
 
 class PyImEdit: #TODO inherit from Image
     def __init__(self,
-            input_dir=None, output_dir=None, image_fp=None
+            input_dir=None, output_dir=None, image_fp=None,
             palette_dir=None):
 
         self.set_image_input_dir(input_dir)
@@ -117,7 +117,8 @@ class PyImEdit: #TODO inherit from Image
             for xi in range(tn_ysize):
                 self.pix[xi+x, yi+y] = tn_pix[xi, yi]
 
-    def compose_image_from_palette(self, palette_name): #TODO add a check to see if has a profile
+    def compose_from_palette(self, palette_name):
+        #TODO add a check to see if has a profile
         Palette = Palette(palette_name)
         for yi in range(self.ysize):
             remaining_iters = self.ysize-yi
