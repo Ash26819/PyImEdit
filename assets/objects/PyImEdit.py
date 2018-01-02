@@ -105,8 +105,6 @@ class PyImEdit: #TODO inherit from Image
         image = self.image.resize((xsize, ysize))
         self.init_vars(image)
 
-########################################################
-
     def apply_thumbnail(self, point, thumbnail_name):
         thumbnail_fp = "./assets/images/thumbnailer/thumbnails/{}.png".format(thumbnail_name)
         tn_xsize = int(self.xsize * 0.20)
