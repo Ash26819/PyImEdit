@@ -1,2 +1,2 @@
-work on wire view
-work on building an image out of something physical
+work on wire_view
+move Palette, Pixel, and other objects to PyImEdit to assist with import issues
